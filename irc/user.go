@@ -2,7 +2,6 @@ package irc
 
 import (
 	"log"
-	"time"
 
   "gopkg.in/sorcix/irc.v2"
 )
@@ -27,18 +26,14 @@ func NewUser(c *Client) *User {
 }
 
 func (u *User) Send(m *irc.Message) {
-	timer := time.NewTimer(10 * time.Millisecond)
 	select {
 	case u.out <-m:
-	case <-timer.C:
+	default:
 		select {
 		case u.err <-m:
 		default:
 			// dropped, but successfully signalled error anyway
 		}
-	}
-	if !timer.Stop() {
-		<-timer.C
 	}
 }
 
