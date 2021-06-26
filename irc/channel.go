@@ -16,13 +16,21 @@ type chanServer struct {
 type channel struct {
 	Name string
 	Users map[*User]struct{}
+	SimpleMode chanModes
 }
+
+type chanModes int
+const (
+	CM_NONE chanModes = iota << 1
+	CM_NOEXT
+)
 
 type chanReqType int
 const (
-	CR_JOIN = iota
+	CR_JOIN chanReqType = iota
 	CR_PRIVMSG
 	CR_NOTICE
+	CR_MODE
 	CR_LEAVE
 	CR_QUIT
 )
@@ -74,6 +82,19 @@ func (cs *chanServer) run(reqCh <-chan chanRequest) {
 		case CR_PRIVMSG, CR_NOTICE:
 			if chOk {
 				ch.msg(req.Type, req.User, req.Params)
+			} else {
+				req.User.Send(&irc.Message{
+					Prefix: &irc.Prefix{Name: cs.server.Name},
+					Command: irc.ERR_NOSUCHCHANNEL,
+					Params: []string{req.User.Nick, req.Name, "No such channel"}})
+			}
+		case CR_MODE:
+			if chOk {
+				if req.Params == nil {
+					ch.modeSend(req.User, cs.server)
+				} else {
+					ch.mode(req.User, req.Params, cs.server)
+				}
 			} else {
 				req.User.Send(&irc.Message{
 					Prefix: &irc.Prefix{Name: cs.server.Name},
@@ -195,5 +216,70 @@ func (ch *channel) msg(t chanReqType, user *User, params []string) {
 		if u != user {
 			u.Send(msg)
 		}
+	}
+}
+
+func (ch *channel) modeSend(user *User, server *Server) {
+	mode := "+"
+	if ch.SimpleMode & CM_NOEXT == CM_NOEXT {
+		mode += "n"
+	}
+
+	user.Send(&irc.Message{
+		Prefix: &irc.Prefix{Name: server.Name},
+		Command: irc.RPL_CHANNELMODEIS,
+		Params: []string{user.Nick, ch.Name, mode}})
+}
+
+func (ch *channel) mode(user *User, params []string, server *Server) {
+	if len(params) < 1 {
+		return
+	}
+
+	modes := params[0]
+
+	state := '+'
+	bad := ' '
+	var modeChange strings.Builder
+	for _, c := range modes {
+		switch c {
+		case '+', '-':
+			state = c
+		case 'n':
+			old := ch.SimpleMode
+			if state == '+' {
+				ch.SimpleMode |= CM_NOEXT
+			} else {
+				ch.SimpleMode &= ^CM_NOEXT
+			}
+			if ch.SimpleMode != old {
+				modeChange.WriteRune(state)
+				modeChange.WriteRune(c)
+			}
+		case 'b':
+			// Just ignore for now, stops errors in Irssi
+		default:
+			bad = c
+			break
+		}
+	}
+
+	mc := modeChange.String()
+	if len(mc) > 0 {
+		msg := &irc.Message{
+			Prefix: user.Prefix,
+			Command: "MODE",
+			Params: []string{ch.Name, mc}}
+		for u := range ch.Users {
+			u.Send(msg)
+		}
+	}
+
+	if bad != ' ' {
+		user.Send(&irc.Message{
+			Prefix: &irc.Prefix{Name: server.Name},
+      Command: irc.ERR_UNKNOWNMODE,
+			Params: []string{user.Nick, string(bad), "is an unknown mode character"}})
+		return
 	}
 }

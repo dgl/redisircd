@@ -24,6 +24,7 @@ var commands = commandMap{
 	"PART": (*Client).part,
 	"PRIVMSG": (*Client).msg,
 	"NOTICE": (*Client).msg,
+	"MODE": (*Client).mode,
 }
 
 // commands receives inbound commands from the client
@@ -115,7 +116,7 @@ func (c *Client) msg(m *irc.Message) error {
 		return nil
 	}
 
-	t := chanReqType(CR_PRIVMSG)
+	t := CR_PRIVMSG
 	if m.Command == "NOTICE" {
 		t = CR_NOTICE
 	}
@@ -173,4 +174,35 @@ func (c *Client) quit(reason string) error {
 		Command: "QUIT",
 		Params: []string{reason}})
 	return errors.New(reason)
+}
+
+func (c *Client) mode(m *irc.Message) error {
+	if len(m.Params) < 1 {
+		c.reply(irc.ERR_NEEDMOREPARAMS, "MODE", "Not enough parameters")
+		return nil
+	}
+
+	target := m.Params[0]
+
+	if len(target) > 0 && target[0] == '#' {
+		// Channel
+		if len(m.Params) == 1 {
+			c.Server.cs.send(chanRequest{Type: CR_MODE, User: c.User, Name: target})
+		} else {
+			c.Server.cs.send(chanRequest{Type: CR_MODE, User: c.User, Name: target, Params: m.Params[1:]})
+		}
+	} else {
+		// User
+		if strings.ToLower(target) == strings.ToLower(c.User.Nick) {
+			if len(m.Params) == 1 {
+				c.reply(irc.RPL_UMODEIS, "+i")
+			} else {
+				// No changing of umode yet.
+			}
+		} else {
+			c.reply(irc.ERR_USERSDONTMATCH, "Can't change mode for other users")
+		}
+	}
+
+	return nil
 }
