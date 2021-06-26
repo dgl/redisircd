@@ -1,0 +1,9 @@
+github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/mediocregopher/radix/v4 v4.0.0-beta.1 h1:RDgQ4wCQ6f+pUsX20CIzjNJnI5P9KDw4j1sjOVHxo7Y=
+github.com/mediocregopher/radix/v4 v4.0.0-beta.1/go.mod h1:Z74pilm773ghbGV4EEoPvi6XWgkAfr0VCNkfa8gI1PU=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
+github.com/tilinna/clock v1.0.2 h1:6BO2tyAC9JbPExKH/z9zl44FLu1lImh3nDNKA0kgrkI=
+github.com/tilinna/clock v1.0.2/go.mod h1:ZsP7BcY7sEEz7ktc0IVy8Us6boDrK8VradlKRUGfOao=
+gopkg.in/sorcix/irc.v2 v2.0.0-20200812151606-3f15758ea8c7 h1:XS4tmz0w7EYviIrBpFVww8IyKJQiIX5SU/1ptPVtBWI=
+gopkg.in/sorcix/irc.v2 v2.0.0-20200812151606-3f15758ea8c7/go.mod h1:PmJkUcwbuPi1FiZ9Rarr6wzVMvzkO7uWqH1jwrMkgW0=
