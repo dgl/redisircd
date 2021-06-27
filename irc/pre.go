@@ -127,6 +127,6 @@ func (c *Client) connect() {
 
 	c.reply(irc.RPL_WELCOME, fmt.Sprintf("Welcome to something like IRC, %s", c.nick))
 	c.reply(irc.RPL_YOURHOST, fmt.Sprintf("Your host is %s, running version redisircd-0.XXX", c.Server.Name))
-	c.reply(irc.RPL_MYINFO, c.Server.Name, "redisircd-0.XXX", "iw", "no", "o")
+	c.reply(irc.RPL_MYINFO, c.Server.Name, "redisircd-0.XXX", "iw", "noR", "oR")
 	// TODO: 005 / etc
 }

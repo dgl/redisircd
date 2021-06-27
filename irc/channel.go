@@ -17,6 +17,8 @@ type channel struct {
 	Name string
 	Users map[*User]struct{}
 	SimpleMode chanModes
+
+	redisPubsub string
 }
 
 type chanModes int
@@ -237,10 +239,12 @@ func (ch *channel) mode(user *User, params []string, server *Server) {
 	}
 
 	modes := params[0]
+	paramIdx := 1
 
 	state := '+'
 	bad := ' '
 	var modeChange strings.Builder
+	var modeParam []string
 	for _, c := range modes {
 		switch c {
 		case '+', '-':
@@ -258,6 +262,19 @@ func (ch *channel) mode(user *User, params []string, server *Server) {
 			}
 		case 'b':
 			// Just ignore for now, stops errors in Irssi
+		case 'R':
+			if len(params) > paramIdx {
+				p := params[paramIdx]
+				paramIdx++
+				modeChange.WriteRune(state)
+				modeChange.WriteRune(c)
+				modeParam = append(modeParam, p)
+
+				if state == '+' {
+					ch.redisPubsub = p
+					go redisPubsub(ch, server)
+				}
+			}
 		default:
 			bad = c
 			break
@@ -265,11 +282,12 @@ func (ch *channel) mode(user *User, params []string, server *Server) {
 	}
 
 	mc := modeChange.String()
+	// TODO: compress -/+ states
 	if len(mc) > 0 {
 		msg := &irc.Message{
 			Prefix: user.Prefix,
 			Command: "MODE",
-			Params: []string{ch.Name, mc}}
+			Params: append([]string{ch.Name, mc}, modeParam...)}
 		for u := range ch.Users {
 			u.Send(msg)
 		}

@@ -1,20 +1,16 @@
 package irc
 
 import (
-	"context"
 	"log"
 	"net"
 	"time"
 
-	"github.com/mediocregopher/radix/v4"
 	"gopkg.in/sorcix/irc.v2"
 )
 
 type Server struct {
 	Name string
 	RedisHost string
-
-	redisClient radix.Client
 
 	cs *chanServer
 	ns *nickServer
@@ -45,12 +41,6 @@ func NewServer(name, redisHost string) *Server {
 }
 
 func (s *Server) Listen(listen string) error {
-	client, err := (radix.PoolConfig{}).New(context.TODO(), "tcp", s.RedisHost)
-	if err != nil {
-		return err
-	}
-	s.redisClient = client
-
 	ln, err := net.Listen("tcp", listen)
 	if err != nil {
 		return err
