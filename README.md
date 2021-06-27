@@ -48,3 +48,8 @@ JSON can be turned on:
 redis-cli publish test '{"text":"hi","nick":"yo"}'
 ```
 
+Then you should see:
+
+```
+<yo> hi
+```
