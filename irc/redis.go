@@ -2,9 +2,12 @@ package irc
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/mediocregopher/radix/v4"
+	"github.com/PaesslerAG/jsonpath"
 	"gopkg.in/sorcix/irc.v2"
 )
 
@@ -27,6 +30,34 @@ func redisPubsub(channel *channel, server *Server) {
 	log.Printf("Subscribed to %v", name)
 
 	for m := range msgCh {
+		text := string(m.Message)
+		name := name
+
+		if channel.redisType == "json" {
+			var j interface{}
+			err := json.Unmarshal(m.Message, &j)
+			if err == nil {
+				if len(channel.redisTextPath) > 0 {
+					if res, err := jsonpath.Get(channel.redisTextPath, j); err != nil {
+						text = fmt.Sprintf("%q [%v]", string(m.Message), err)
+					} else {
+						text = fmt.Sprintf("%s", res)
+					}
+				}
+				if len(channel.redisNickPath) > 0 {
+					if res, err := jsonpath.Get(channel.redisNickPath, j); err != nil {
+						name = "redis"
+						text = fmt.Sprintf("%q [%v]", string(m.Message), err)
+					} else if s, ok := res.(string); ok {
+						// Need an actual string
+						name = s
+					}
+				}
+			} else {
+				text = fmt.Sprintf("%q [%v]", string(m.Message), err)
+			}
+		}
+
 		server.cs.send(chanRequest{
 			Type: CR_PRIVMSG,
 			Name: channel.Name,
@@ -36,6 +67,6 @@ func redisPubsub(channel *channel, server *Server) {
 				User: "auto",
 				Host: "redis",
 			}},
-			Params: []string{string(m.Message)}})
+			Params: []string{text}})
 	}
 }

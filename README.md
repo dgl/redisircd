@@ -20,7 +20,9 @@ were to use a clustered Redis behind this, you'll find out that doesn't
 
 Run redisircd:
 
+```
 ./redisircd --listen :6667 --redis localhost:6379
+```
 
 Connect an IRC client to it.
 
@@ -31,10 +33,18 @@ Then:
 /mode #test +R test
 ```
 
-Then run: redis-cli publish test foo
+Then run: `redis-cli publish test foo`
 
 You should see:
 
 ```
 <test> foo
 ```
+
+JSON can be turned on:
+
+```
+/mode #test +JTN $.text $.nick
+redis-cli publish test '{"text":"hi","nick":"yo"}'
+```
+

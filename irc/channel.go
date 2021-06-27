@@ -19,6 +19,7 @@ type channel struct {
 	SimpleMode chanModes
 
 	redisPubsub string
+	redisType, redisTextPath, redisNickPath string
 }
 
 type chanModes int
@@ -277,6 +278,45 @@ func (ch *channel) mode(user *User, params []string, server *Server) {
 					go redisPubsub(ch, server)
 				}
 			}
+		case 'J':
+			if state == '+' {
+				ch.redisType = "json"
+			} else {
+				ch.redisType = "plain"
+			}
+			modeChange.WriteRune(state)
+			modeChange.WriteRune(c)
+
+		case 'N':
+			if len(params) > paramIdx {
+				p := params[paramIdx]
+				paramIdx++
+				modeChange.WriteRune(state)
+				modeChange.WriteRune(c)
+				modeParam = append(modeParam, p)
+
+				if state == '+' {
+					ch.redisNickPath = p
+				} else {
+					ch.redisNickPath = ""
+				}
+			}
+
+		case 'T':
+			if len(params) > paramIdx {
+				p := params[paramIdx]
+				paramIdx++
+				modeChange.WriteRune(state)
+				modeChange.WriteRune(c)
+				modeParam = append(modeParam, p)
+
+				if state == '+' {
+					ch.redisTextPath = p
+				} else {
+					ch.redisTextPath = ""
+				}
+			}
+
 		default:
 			bad = c
 			break
