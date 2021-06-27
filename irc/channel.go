@@ -18,7 +18,7 @@ type channel struct {
 	Users      map[*User]struct{}
 	SimpleMode chanModes
 
-	redisPubsub string
+	redisPubsub                             string
 	redisType, redisTextPath, redisNickPath string
 }
 

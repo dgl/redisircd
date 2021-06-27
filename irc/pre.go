@@ -18,6 +18,11 @@ var preCommands = commandMap{
 	"USER": (*Client).preUser,
 	"NICK": (*Client).preNick,
 	"PING": (*Client).ping,
+
+	"GET":     (*Client).maybeHTTP,
+	"HEAD":    (*Client).maybeHTTP,
+	"OPTIONS": (*Client).maybeHTTP,
+	"POST":    (*Client).maybeHTTP,
 }
 
 func (c *Client) pre() error {

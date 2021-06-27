@@ -5,18 +5,20 @@ import (
 	"net"
 	"time"
 
+	"github.com/dgl/redisircd/ircbuf"
+
 	"gopkg.in/sorcix/irc.v2"
 )
 
 const (
-	NAME = "redisircd"
+	NAME    = "redisircd"
 	VERSION = "0.0.1"
 )
 
 type Server struct {
 	Name      string
 	RedisHost string
-	Debug bool
+	Debug     bool
 
 	cs *chanServer
 	ns *nickServer
@@ -24,7 +26,7 @@ type Server struct {
 
 type Client struct {
 	Server *Server
-	*irc.Conn
+	*ircbuf.Conn
 	tcpConn net.Conn
 
 	connected      bool
@@ -40,7 +42,7 @@ func NewServer(name, redisHost string, debug bool) *Server {
 	s := &Server{
 		Name:      name,
 		RedisHost: redisHost,
-		Debug: debug,
+		Debug:     debug,
 	}
 	s.cs = NewChanServer(s)
 	s.ns = NewNickServer(s)
@@ -72,7 +74,7 @@ func (s *Server) handle(conn net.Conn) {
 	defer conn.Close()
 	c := Client{
 		Server:  s,
-		Conn:    irc.NewConn(conn),
+		Conn:    ircbuf.NewConn(conn),
 		tcpConn: conn,
 	}
 

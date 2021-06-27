@@ -7,8 +7,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/mediocregopher/radix/v4"
 	"github.com/PaesslerAG/jsonpath"
+	"github.com/mediocregopher/radix/v4"
 	"gopkg.in/sorcix/irc.v2"
 )
 
