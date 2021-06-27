@@ -59,7 +59,9 @@ func (c *Client) commands() error {
 			continue
 		}
 		c.last = time.Now()
-		log.Print(message)
+		if c.Server.Debug {
+			log.Print(message)
+		}
 
 		if cmd, ok := commands[message.Command]; ok {
 			err := cmd(c, message)

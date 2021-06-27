@@ -8,9 +8,15 @@ import (
 	"gopkg.in/sorcix/irc.v2"
 )
 
+const (
+	NAME = "redisircd"
+	VERSION = "0.0.1"
+)
+
 type Server struct {
 	Name      string
 	RedisHost string
+	Debug bool
 
 	cs *chanServer
 	ns *nickServer
@@ -30,10 +36,11 @@ type Client struct {
 	Realname string
 }
 
-func NewServer(name, redisHost string) *Server {
+func NewServer(name, redisHost string, debug bool) *Server {
 	s := &Server{
 		Name:      name,
 		RedisHost: redisHost,
+		Debug: debug,
 	}
 	s.cs = NewChanServer(s)
 	s.ns = NewNickServer(s)
@@ -73,6 +80,8 @@ func (s *Server) handle(conn net.Conn) {
 	if err != nil {
 		return
 	}
+
+	log.Printf("New connection %v", c.User.Prefix)
 
 	c.User.output()
 

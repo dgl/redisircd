@@ -25,11 +25,13 @@ func (c *Client) pre() error {
 		c.tcpConn.SetReadDeadline(time.Now().Add(timeoutDuration))
 		message, err := c.Decode()
 		if err != nil || message == nil {
-			log.Printf("Decode: %v", err)
+			log.Printf("Decode error: %v", err)
 			return err
 		}
 		c.last = time.Now()
-		log.Print(message)
+		if c.Server.Debug {
+			log.Print(message)
+		}
 
 		if cmd, ok := preCommands[message.Command]; ok {
 			err := cmd(c, message)
@@ -126,7 +128,13 @@ func (c *Client) connect() {
 	c.User = u
 
 	c.reply(irc.RPL_WELCOME, fmt.Sprintf("Welcome to something like IRC, %s", c.nick))
-	c.reply(irc.RPL_YOURHOST, fmt.Sprintf("Your host is %s, running version redisircd-0.XXX", c.Server.Name))
-	c.reply(irc.RPL_MYINFO, c.Server.Name, "redisircd-0.XXX", "iw", "noR", "oR")
+	debug := ""
+	if c.Server.Debug {
+		debug = "[DEBUG]"
+	}
+	v := fmt.Sprintf("%s-%s%s", NAME, VERSION, debug)
+
+	c.reply(irc.RPL_YOURHOST, fmt.Sprintf("Your host is %s, running version %s", c.Server.Name, v))
+	c.reply(irc.RPL_MYINFO, c.Server.Name, v, "iw", "noR", "oR")
 	// TODO: 005 / etc
 }
