@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/mediocregopher/radix/v4"
 	"github.com/PaesslerAG/jsonpath"
@@ -49,8 +50,9 @@ func redisPubsub(channel *channel, server *Server) {
 						name = "redis"
 						text = fmt.Sprintf("%q [%v]", string(m.Message), err)
 					} else if s, ok := res.(string); ok {
-						// Need an actual string
-						name = s
+						// Need an actual string, also make sure there's no spaces, as
+						// that totally breaks the IRC protocol...
+						name = strings.Split(s, " ")[0]
 					}
 				}
 			} else {
