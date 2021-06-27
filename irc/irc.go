@@ -9,7 +9,7 @@ import (
 )
 
 type Server struct {
-	Name string
+	Name      string
 	RedisHost string
 
 	cs *chanServer
@@ -21,9 +21,9 @@ type Client struct {
 	*irc.Conn
 	tcpConn net.Conn
 
-	connected bool
+	connected      bool
 	username, nick string
-	last time.Time
+	last           time.Time
 
 	User *User
 
@@ -32,7 +32,7 @@ type Client struct {
 
 func NewServer(name, redisHost string) *Server {
 	s := &Server{
-		Name: name,
+		Name:      name,
 		RedisHost: redisHost,
 	}
 	s.cs = NewChanServer(s)
@@ -64,9 +64,9 @@ func (s *Server) Listen(listen string) error {
 func (s *Server) handle(conn net.Conn) {
 	defer conn.Close()
 	c := Client{
-		Server: s,
-		Conn: irc.NewConn(conn),
-	  tcpConn: conn,
+		Server:  s,
+		Conn:    irc.NewConn(conn),
+		tcpConn: conn,
 	}
 
 	err := c.pre()

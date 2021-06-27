@@ -3,34 +3,34 @@ package irc
 import (
 	"log"
 
-  "gopkg.in/sorcix/irc.v2"
+	"gopkg.in/sorcix/irc.v2"
 )
 
 type User struct {
 	// Must only be written by nickServer
-	Nick string
+	Nick   string
 	Prefix *irc.Prefix
 
 	// Must only be written by chanServer
 	Channels map[*channel]struct{}
 
-	client *Client
+	client   *Client
 	out, err chan<- *irc.Message
 }
 
 func NewUser(c *Client) *User {
 	return &User{
 		Channels: make(map[*channel]struct{}),
-		client: c,
+		client:   c,
 	}
 }
 
 func (u *User) Send(m *irc.Message) {
 	select {
-	case u.out <-m:
+	case u.out <- m:
 	default:
 		select {
-		case u.err <-m:
+		case u.err <- m:
 		default:
 			// dropped, but successfully signalled error anyway
 		}

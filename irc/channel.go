@@ -9,25 +9,27 @@ import (
 // chanServer runs in a goroutine and manages channels
 type chanServer struct {
 	channels map[string]*channel
-	server *Server
-	sendCh chan<- chanRequest
+	server   *Server
+	sendCh   chan<- chanRequest
 }
 
 type channel struct {
-	Name string
-	Users map[*User]struct{}
+	Name       string
+	Users      map[*User]struct{}
 	SimpleMode chanModes
 
 	redisPubsub string
 }
 
 type chanModes int
+
 const (
 	CM_NONE chanModes = iota << 1
 	CM_NOEXT
 )
 
 type chanReqType int
+
 const (
 	CR_JOIN chanReqType = iota
 	CR_PRIVMSG
@@ -38,9 +40,9 @@ const (
 )
 
 type chanRequest struct {
-	Type chanReqType
-	Name string
-	User *User
+	Type   chanReqType
+	Name   string
+	User   *User
 	Params []string
 }
 
@@ -49,8 +51,8 @@ func NewChanServer(server *Server) *chanServer {
 
 	cs := &chanServer{
 		channels: make(map[string]*channel),
-		server: server,
-		sendCh: reqCh,
+		server:   server,
+		sendCh:   reqCh,
 	}
 	go cs.run(reqCh)
 	return cs
@@ -65,7 +67,7 @@ func (cs *chanServer) run(reqCh <-chan chanRequest) {
 			if !chOk {
 				// Need to create it
 				ch = &channel{
-					Name: req.Name,
+					Name:  req.Name,
 					Users: make(map[*User]struct{}),
 				}
 				chOk = true
@@ -86,9 +88,9 @@ func (cs *chanServer) run(reqCh <-chan chanRequest) {
 				ch.msg(req.Type, req.User, req.Params)
 			} else {
 				req.User.Send(&irc.Message{
-					Prefix: &irc.Prefix{Name: cs.server.Name},
+					Prefix:  &irc.Prefix{Name: cs.server.Name},
 					Command: irc.ERR_NOSUCHCHANNEL,
-					Params: []string{req.User.Nick, req.Name, "No such channel"}})
+					Params:  []string{req.User.Nick, req.Name, "No such channel"}})
 			}
 		case CR_MODE:
 			if chOk {
@@ -99,9 +101,9 @@ func (cs *chanServer) run(reqCh <-chan chanRequest) {
 				}
 			} else {
 				req.User.Send(&irc.Message{
-					Prefix: &irc.Prefix{Name: cs.server.Name},
+					Prefix:  &irc.Prefix{Name: cs.server.Name},
 					Command: irc.ERR_NOSUCHCHANNEL,
-					Params: []string{req.User.Nick, req.Name, "No such channel"}})
+					Params:  []string{req.User.Nick, req.Name, "No such channel"}})
 			}
 		case CR_LEAVE:
 			if chOk {
@@ -111,9 +113,9 @@ func (cs *chanServer) run(reqCh <-chan chanRequest) {
 				}
 			} else {
 				req.User.Send(&irc.Message{
-					Prefix: &irc.Prefix{Name: cs.server.Name},
+					Prefix:  &irc.Prefix{Name: cs.server.Name},
 					Command: irc.ERR_NOSUCHCHANNEL,
-					Params: []string{req.User.Nick, req.Name, "No such channel"}})
+					Params:  []string{req.User.Nick, req.Name, "No such channel"}})
 			}
 		}
 	}
@@ -137,9 +139,9 @@ func (cs *chanServer) quit(user *User, params []string) {
 		}
 	}
 	msg := &irc.Message{
-		Prefix: user.Prefix,
+		Prefix:  user.Prefix,
 		Command: "QUIT",
-		Params: []string{params[0]},
+		Params:  []string{params[0]},
 	}
 	for u := range um {
 		u.Send(msg)
@@ -152,9 +154,9 @@ func (ch *channel) join(user *User, server *Server) {
 	user.Channels[ch] = struct{}{}
 
 	msg := &irc.Message{
-		Prefix: user.Prefix,
+		Prefix:  user.Prefix,
 		Command: "JOIN",
-		Params: []string{ch.Name},
+		Params:  []string{ch.Name},
 	}
 	for u := range ch.Users {
 		u.Send(msg)
@@ -172,21 +174,21 @@ func (ch *channel) join(user *User, server *Server) {
 		i++
 	}
 	user.Send(&irc.Message{
-		Prefix: sp,
+		Prefix:  sp,
 		Command: irc.RPL_NAMREPLY,
-		Params: []string{user.Nick, "=", ch.Name, sb.String()}})
-  user.Send(&irc.Message{
-		Prefix: sp,
+		Params:  []string{user.Nick, "=", ch.Name, sb.String()}})
+	user.Send(&irc.Message{
+		Prefix:  sp,
 		Command: irc.RPL_ENDOFNAMES,
-		Params: []string{user.Nick, ch.Name, "End of NAMES list"}})
+		Params:  []string{user.Nick, ch.Name, "End of NAMES list"}})
 }
 
 func (ch *channel) leave(user *User, params []string, server *Server) {
 	if _, ok := ch.Users[user]; !ok {
 		user.Send(&irc.Message{
-			Prefix: &irc.Prefix{Name: server.Name},
+			Prefix:  &irc.Prefix{Name: server.Name},
 			Command: irc.ERR_NOTONCHANNEL,
-			Params: []string{user.Nick, ch.Name, "You're not on that channel"}})
+			Params:  []string{user.Nick, ch.Name, "You're not on that channel"}})
 		return
 	}
 
@@ -194,9 +196,9 @@ func (ch *channel) leave(user *User, params []string, server *Server) {
 	delete(user.Channels, ch)
 
 	msg := &irc.Message{
-		Prefix: user.Prefix,
+		Prefix:  user.Prefix,
 		Command: "PART",
-		Params: []string{ch.Name, params[0]},
+		Params:  []string{ch.Name, params[0]},
 	}
 	for u := range ch.Users {
 		u.Send(msg)
@@ -210,9 +212,9 @@ func (ch *channel) msg(t chanReqType, user *User, params []string) {
 	}
 
 	msg := &irc.Message{
-		Prefix: user.Prefix,
+		Prefix:  user.Prefix,
 		Command: cmd,
-		Params: []string{ch.Name, params[0]},
+		Params:  []string{ch.Name, params[0]},
 	}
 	for u := range ch.Users {
 		if u != user {
@@ -223,14 +225,14 @@ func (ch *channel) msg(t chanReqType, user *User, params []string) {
 
 func (ch *channel) modeSend(user *User, server *Server) {
 	mode := "+"
-	if ch.SimpleMode & CM_NOEXT == CM_NOEXT {
+	if ch.SimpleMode&CM_NOEXT == CM_NOEXT {
 		mode += "n"
 	}
 
 	user.Send(&irc.Message{
-		Prefix: &irc.Prefix{Name: server.Name},
+		Prefix:  &irc.Prefix{Name: server.Name},
 		Command: irc.RPL_CHANNELMODEIS,
-		Params: []string{user.Nick, ch.Name, mode}})
+		Params:  []string{user.Nick, ch.Name, mode}})
 }
 
 func (ch *channel) mode(user *User, params []string, server *Server) {
@@ -285,9 +287,9 @@ func (ch *channel) mode(user *User, params []string, server *Server) {
 	// TODO: compress -/+ states
 	if len(mc) > 0 {
 		msg := &irc.Message{
-			Prefix: user.Prefix,
+			Prefix:  user.Prefix,
 			Command: "MODE",
-			Params: append([]string{ch.Name, mc}, modeParam...)}
+			Params:  append([]string{ch.Name, mc}, modeParam...)}
 		for u := range ch.Users {
 			u.Send(msg)
 		}
@@ -295,9 +297,9 @@ func (ch *channel) mode(user *User, params []string, server *Server) {
 
 	if bad != ' ' {
 		user.Send(&irc.Message{
-			Prefix: &irc.Prefix{Name: server.Name},
-      Command: irc.ERR_UNKNOWNMODE,
-			Params: []string{user.Nick, string(bad), "is an unknown mode character"}})
+			Prefix:  &irc.Prefix{Name: server.Name},
+			Command: irc.ERR_UNKNOWNMODE,
+			Params:  []string{user.Nick, string(bad), "is an unknown mode character"}})
 		return
 	}
 }

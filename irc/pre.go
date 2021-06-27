@@ -54,9 +54,9 @@ func (c *Client) reply(numeric string, params ...string) {
 		nick = c.nick
 	}
 	c.Encode(&irc.Message{
-		Prefix: &irc.Prefix{Name: c.Server.Name},
+		Prefix:  &irc.Prefix{Name: c.Server.Name},
 		Command: numeric,
-		Params: append([]string{nick}, params...)})
+		Params:  append([]string{nick}, params...)})
 }
 
 func (c *Client) preQuit(m *irc.Message) error {
@@ -65,9 +65,9 @@ func (c *Client) preQuit(m *irc.Message) error {
 		message = m.Params[0]
 	}
 	c.Encode(&irc.Message{
-		Prefix: &irc.Prefix{Name: c.nick, User: c.username, Host: "0.0.0.0"},
+		Prefix:  &irc.Prefix{Name: c.nick, User: c.username, Host: "0.0.0.0"},
 		Command: "QUIT",
-		Params: []string{message}})
+		Params:  []string{message}})
 	return errors.New("QUIT :" + message)
 }
 
@@ -109,10 +109,10 @@ func (c *Client) preNick(m *irc.Message) error {
 
 func (c *Client) connect() {
 	req := nickRequest{
-		Type: NR_NEW,
-		Name: c.nick,
+		Type:   NR_NEW,
+		Name:   c.nick,
 		Client: c,
-		Reply: make(chan *User),
+		Reply:  make(chan *User),
 	}
 	c.Server.ns.send(req)
 

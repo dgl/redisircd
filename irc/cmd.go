@@ -1,13 +1,13 @@
 package irc
 
 import (
-	"log"
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
-	"time"
 	"strings"
+	"time"
 
 	"gopkg.in/sorcix/irc.v2"
 )
@@ -17,14 +17,14 @@ type CommandFn func(*Client, *irc.Message) error
 type commandMap map[string]CommandFn
 
 var commands = commandMap{
-	"PING": (*Client).ping,
-	"PONG": (*Client).pong,
-	"JOIN": (*Client).join,
-	"QUIT": (*Client).userQuit,
-	"PART": (*Client).part,
+	"PING":    (*Client).ping,
+	"PONG":    (*Client).pong,
+	"JOIN":    (*Client).join,
+	"QUIT":    (*Client).userQuit,
+	"PART":    (*Client).part,
 	"PRIVMSG": (*Client).msg,
-	"NOTICE": (*Client).msg,
-	"MODE": (*Client).mode,
+	"NOTICE":  (*Client).msg,
+	"MODE":    (*Client).mode,
 }
 
 // commands receives inbound commands from the client
@@ -37,7 +37,7 @@ func (c *Client) commands() error {
 				if oerr.Timeout() {
 					// Timeout, maybe send a ping?
 					now := time.Now()
-					if c.last.Add(3*timeoutDuration).After(now) {
+					if c.last.Add(3 * timeoutDuration).After(now) {
 						c.Encode(&irc.Message{Command: "PING", Params: []string{c.Server.Name}})
 					} else {
 						return c.quit(fmt.Sprintf("Ping timeout (%d seconds)", int(now.Sub(c.last)/time.Second)))
@@ -79,9 +79,9 @@ func (c *Client) ping(m *irc.Message) error {
 	}
 
 	c.Encode(&irc.Message{
-		Prefix: &irc.Prefix{Name: c.Server.Name},
+		Prefix:  &irc.Prefix{Name: c.Server.Name},
 		Command: "PONG",
-		Params: []string{c.Server.Name, m.Params[0]}})
+		Params:  []string{c.Server.Name, m.Params[0]}})
 
 	return nil
 }
@@ -170,9 +170,9 @@ func (c *Client) quit(reason string) error {
 	c.Server.cs.send(chanRequest{Type: CR_QUIT, User: c.User, Params: []string{reason}})
 	c.Server.ns.send(nickRequest{Type: NR_QUIT, Name: c.User.Nick})
 	c.Encode(&irc.Message{
-		Prefix: c.User.Prefix,
+		Prefix:  c.User.Prefix,
 		Command: "QUIT",
-		Params: []string{reason}})
+		Params:  []string{reason}})
 	return errors.New(reason)
 }
 

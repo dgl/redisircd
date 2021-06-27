@@ -9,12 +9,13 @@ import (
 
 // nickServer runs in a goroutine and manages nicknames
 type nickServer struct {
-	nicks map[string]*User
+	nicks  map[string]*User
 	server *Server
 	sendCh chan<- nickRequest
 }
 
 type nickReqType int
+
 const (
 	NR_NEW = iota
 	NR_CHANGE
@@ -22,17 +23,17 @@ const (
 )
 
 type nickRequest struct {
-	Type nickReqType
-	Name string
+	Type   nickReqType
+	Name   string
 	Client *Client
-	Reply chan *User
+	Reply  chan *User
 }
 
 func NewNickServer(server *Server) *nickServer {
 	reqCh := make(chan nickRequest, 100)
 
 	ns := &nickServer{
-		nicks: make(map[string]*User),
+		nicks:  make(map[string]*User),
 		server: server,
 		sendCh: reqCh,
 	}
