@@ -229,6 +229,18 @@ func (ch *channel) modeSend(user *User, server *Server) {
 	if ch.SimpleMode&CM_NOEXT == CM_NOEXT {
 		mode += "n"
 	}
+	if ch.redisType == "json" {
+		mode += "J"
+	}
+	if ch.redisPubsub != "" {
+		mode += "R"
+	}
+	if ch.redisNickPath != "" {
+		mode += "N"
+	}
+	if ch.redisTextPath != "" {
+		mode += "T"
+	}
 
 	user.Send(&irc.Message{
 		Prefix:  &irc.Prefix{Name: server.Name},
