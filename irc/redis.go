@@ -52,7 +52,8 @@ func redisPubsub(channel *channel, server *Server) {
 					} else if s, ok := res.(string); ok {
 						// Need an actual string, also make sure there's no spaces, as
 						// that totally breaks the IRC protocol...
-						name = strings.Split(s, " ")[0]
+						name = strings.Split(strings.Split(s, "\n")[0], " ")[0]
+
 					}
 				}
 			} else {
@@ -61,6 +62,9 @@ func redisPubsub(channel *channel, server *Server) {
 		}
 
 		for _, line := range strings.Split(text, "\n") {
+			if len(line) == 0 {
+				continue
+			}
 			server.cs.send(chanRequest{
 				Type: CR_PRIVMSG,
 				Name: channel.Name,
@@ -71,6 +75,6 @@ func redisPubsub(channel *channel, server *Server) {
 					Host: "redis",
 				}},
 				Params: []string{line}})
-			}
+		}
 	}
 }
