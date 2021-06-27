@@ -60,15 +60,17 @@ func redisPubsub(channel *channel, server *Server) {
 			}
 		}
 
-		server.cs.send(chanRequest{
-			Type: CR_PRIVMSG,
-			Name: channel.Name,
-			// TODO: We can do better.
-			User: &User{Prefix: &irc.Prefix{
-				Name: name,
-				User: "auto",
-				Host: "redis",
-			}},
-			Params: []string{text}})
+		for _, line := range strings.Split(text, "\n") {
+			server.cs.send(chanRequest{
+				Type: CR_PRIVMSG,
+				Name: channel.Name,
+				// TODO: We can do better.
+				User: &User{Prefix: &irc.Prefix{
+					Name: name,
+					User: "auto",
+					Host: "redis",
+				}},
+				Params: []string{line}})
+			}
 	}
 }
