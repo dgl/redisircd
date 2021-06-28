@@ -16,7 +16,7 @@
 # scripts that further sanity check the arguments provided. Also, you know, not
 # deal with user input in shell scripts, but that's no fun.
 
-set -euo pipefail
+set -eu
 shopt -s extglob
 
 pubsub=${1:-bot}
@@ -43,7 +43,7 @@ stdbuf -oL redis-cli subscribe "${pubsub}:out" | while read type; do
       params="${param/+([^ ]) /}"
     fi
     if [[ -n $command ]] && [[ -x $command ]]; then
-      echo "$params" | ./$command | xargs -0 redis-cli publish ${pubsub}
+      echo "$params" | nick="$nick" ./$command | xargs -0 -r -n1 -s500 redis-cli publish ${pubsub}
     fi
   fi
 done
