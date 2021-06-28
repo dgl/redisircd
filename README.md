@@ -78,3 +78,5 @@ this. More contributions welcome.
   News](https://news.ycombinator.com) updates and publish them.
 * [units.sh](examples/units.sh) is a simple script that acts as a frontend to
   GNU Units and lets a user interact with it like a calculator.
+* [bot.sh](examples/bot.sh) is a wrapper script that can run other carefully
+  controlled commands.
