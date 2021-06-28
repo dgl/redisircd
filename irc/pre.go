@@ -141,5 +141,5 @@ func (c *Client) connect() {
 
 	c.reply(irc.RPL_YOURHOST, fmt.Sprintf("Your host is %s, running version %s", c.Server.Name, v))
 	c.reply(irc.RPL_MYINFO, c.Server.Name, v, "iw", "noR", "oR")
-	// TODO: 005 / etc
+	c.reply("005", "CASEMAPPING=ascii", "CHANTYPES=#", "CHANMODES=,NT,R,JPn", "NICKLEN=12")
 }
