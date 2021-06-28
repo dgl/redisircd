@@ -18,8 +18,9 @@ type channel struct {
 	Users      map[*User]struct{}
 	SimpleMode chanModes
 
-	redisPubsub                             string
+	redisPubsub                             chan<- *irc.Message
 	redisType, redisTextPath, redisNickPath string
+	redisPublish                            bool
 }
 
 type chanModes int
@@ -217,6 +218,11 @@ func (ch *channel) msg(t chanReqType, user *User, params []string) {
 		Command: cmd,
 		Params:  []string{ch.Name, params[0]},
 	}
+
+	if cmd == "PRIVMSG" && ch.redisPublish && ch.redisPubsub != nil {
+		ch.redisPubsub <- msg
+	}
+
 	for u := range ch.Users {
 		if u != user {
 			u.Send(msg)
@@ -232,7 +238,7 @@ func (ch *channel) modeSend(user *User, server *Server) {
 	if ch.redisType == "json" {
 		mode += "J"
 	}
-	if ch.redisPubsub != "" {
+	if ch.redisPubsub != nil {
 		mode += "R"
 	}
 	if ch.redisNickPath != "" {
@@ -277,18 +283,26 @@ func (ch *channel) mode(user *User, params []string, server *Server) {
 			}
 		case 'b':
 			// Just ignore for now, stops errors in Irssi
+
+		// The Redis specific modes...
 		case 'R':
-			if len(params) > paramIdx {
+			if ch.redisPubsub != nil {
+				close(ch.redisPubsub)
+				ch.redisPubsub = nil
+				if state == '-' {
+					modeChange.WriteRune(state)
+					modeChange.WriteRune(c)
+				}
+			}
+
+			if state == '+' && len(params) > paramIdx {
 				p := params[paramIdx]
 				paramIdx++
+				modeParam = append(modeParam, p)
 				modeChange.WriteRune(state)
 				modeChange.WriteRune(c)
-				modeParam = append(modeParam, p)
 
-				if state == '+' {
-					ch.redisPubsub = p
-					go redisPubsub(ch, server)
-				}
+				ch.redisPubsub = redisPubsub(p, ch, server)
 			}
 		case 'J':
 			if state == '+' {
@@ -328,6 +342,11 @@ func (ch *channel) mode(user *User, params []string, server *Server) {
 					ch.redisTextPath = ""
 				}
 			}
+
+		case 'P':
+			ch.redisPublish = state == '+'
+			modeChange.WriteRune(state)
+			modeChange.WriteRune(c)
 
 		default:
 			bad = c
