@@ -21,7 +21,7 @@ were to use a clustered Redis behind this, you'll find out that doesn't
 Run redisircd:
 
 ```
-./redisircd --listen :6667 --redis localhost:6379
+./redisircd --listen localhost:6667 --redis localhost:6379
 ```
 
 Connect an IRC client to it.
@@ -53,3 +53,28 @@ Then you should see:
 ```
 <yo> hi
 ```
+
+## Modes
+
+The custom modes this supports start with capital letters.
+
+* `+R channel` Enable redis pubsub, listening on the given channel
+* `+J` Redis pubsub payload is formatted as JSON
+* `+N` Use JSONPath expression to extract nickname from JSON payload
+* `+T` Use JSONPath expression to extract text from JSON payload
+* `+P` Enable publishing things said on the channel. Will be sent to the
+  channel configured with `+R` followed by `:out` to avoid loops (e.g.
+  `channel:out`).
+
+There's not yet any concept or ops or such. There may never be; this isn't
+designed to be available on the public internet.
+
+## Examples
+
+These are designed to show how simple it is to write a bot or other tool for
+this. More contributions welcome.
+
+* [hn.sh](examples/hn.sh) is a script to watch for [Hacker
+  News](https://news.ycombinator.com) updates and publish them.
+* [units.sh](examples/units.sh) is a simple script that acts as a frontend to
+  GNU Units and lets a user interact with it like a calculator.
