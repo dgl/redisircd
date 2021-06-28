@@ -42,7 +42,7 @@ func redisPubsub(channel *channel, server *Server) {
 					if res, err := jsonpath.Get(channel.redisTextPath, j); err != nil {
 						text = fmt.Sprintf("%q [%v]", string(m.Message), err)
 					} else {
-						text = fmt.Sprintf("%s", res)
+						text = fmt.Sprintf("%v", res)
 					}
 				}
 				if len(channel.redisNickPath) > 0 {
