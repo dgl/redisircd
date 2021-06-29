@@ -18,7 +18,11 @@ were to use a clustered Redis behind this, you'll find out that doesn't
 
 ## Usage
 
-Run redisircd:
+Watch this!
+
+[![asciicast](https://asciinema.org/a/422798.svg)](https://asciinema.org/a/422798)
+
+or, run redisircd:
 
 ```
 ./redisircd --listen localhost:6667 --redis localhost:6379
