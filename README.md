@@ -16,6 +16,18 @@ This does not scale like a real IRC server would, in particular even if you
 were to use a clustered Redis behind this, you'll find out that doesn't
 [scale for pubsub](https://github.com/redis/redis/issues/2672).
 
+## Building
+
+For now just build directly from Git, e.g. using Go tooling like so:
+
+```
+go install github.com/dgl/redisircd/cmd/redisircd@latest
+```
+
+This will give you a `$(go env GOPATH)/bin/redisircd`
+
+(Needs go 1.16, for earlier use `go get` rather than install.)
+
 ## Usage
 
 Watch this!
