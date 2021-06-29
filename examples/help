@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# !help command for bot.sh
+echo -n "Commands: "
+find . -type l,f -perm /100 -printf "%f\n" | egrep '^[a-z0-9]+$' | sort | tr '\n' ' ' | sed 's/ $//'
