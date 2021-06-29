@@ -82,7 +82,7 @@ The custom modes this supports start with capital letters.
   channel configured with `+R` followed by `:out` to avoid loops (e.g.
   `channel:out`).
 
-There's not yet any concept or ops or such. There may never be; this isn't
+There's not yet any concept of ops or such. There may never be; this isn't
 designed to be available on the public internet.
 
 ## Examples
