@@ -3,16 +3,15 @@
 # in the current directory into a "!" command.
 
 # Run something like:
-#   echo "$(which uptime)" > uptime
-#   chmod +x uptime
+#   ln -s $(which uptime)
 #   ./bot.sh
 # Then on IRC:
 #   /mode #channel +RP bot
 #   <dg> !uptime
 #   <bot> 08:31:35  up 5 days  6:10,  2 users,  load average: 0.26, 0.57, 1.02
 #
-# Note this carefully wraps uptime, as "uptime(1)" itself takes a file argument
-# and could be used to do unexpected things. Better to use custom wrapper
+# Note this trusts uptime, as "uptime(1)" itself is quite safe, but other
+# commands could be used to do unexpected things. Better to use custom wrapper
 # scripts that further sanity check the arguments provided. Also, you know, not
 # deal with user input in shell scripts, but that's no fun.
 
@@ -22,7 +21,8 @@ shopt -s extglob
 pubsub=${1:-bot}
 
 # stdbuf from https://stackoverflow.com/a/66103101, because that's obvious,
-# thanks redis-cli.
+# thanks redis-cli. On macOS you'll need to do something like "brew install
+# coreutils".
 stdbuf -oL redis-cli subscribe "${pubsub}:out" | while read type; do
   read channel # 2nd line
   read message # 3rd line
