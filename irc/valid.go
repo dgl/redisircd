@@ -31,8 +31,8 @@ func validChan(c string) bool {
 		return false
 	}
 
-	// Only # channels for now
-	if c[0] != '#' {
+	// # or $ channels
+	if c[0] != '#' && c[0] != '$' {
 		return false
 	}
 

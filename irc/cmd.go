@@ -118,17 +118,20 @@ func (c *Client) msg(m *irc.Message) error {
 		return nil
 	}
 
-	t := CR_PRIVMSG
-	if m.Command == "NOTICE" {
-		t = CR_NOTICE
-	}
-
 	target := m.Params[0]
 	text := m.Params[1]
-	if target[0] == '#' {
+	if target[0] == '#' || target[0] == '$' {
+		t := CR_PRIVMSG
+		if m.Command == "NOTICE" {
+			t = CR_NOTICE
+		}
 		c.Server.cs.send(chanRequest{Name: target, Type: t, User: c.User, Params: []string{text}})
 	} else {
-		// nick...
+		t := NR_PRIVMSG
+		if m.Command == "NOTICE" {
+			t = NR_NOTICE
+		}
+		c.Server.ns.send(nickRequest{Name: target, Type: t, User: c.User, Params: []string{text}})
 	}
 
 	return nil
@@ -186,7 +189,7 @@ func (c *Client) mode(m *irc.Message) error {
 
 	target := m.Params[0]
 
-	if len(target) > 0 && target[0] == '#' {
+	if len(target) > 0 && (target[0] == '#' || target[0] == '$') {
 		// Channel
 		if len(m.Params) == 1 {
 			c.Server.cs.send(chanRequest{Type: CR_MODE, User: c.User, Name: target})

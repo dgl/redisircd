@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"log"
 	"strings"
 
 	"gopkg.in/sorcix/irc.v2"
@@ -72,14 +73,14 @@ func (cs *chanServer) run(reqCh <-chan chanRequest) {
 					Name:  req.Name,
 					Users: make(map[*User]struct{}),
 				}
-				chOk = true
 				cs.channels[strings.ToLower(req.Name)] = ch
 			}
-			if chOk {
-				if _, ok := ch.Users[req.User]; !ok {
-					// User not already in channel
-					ch.join(req.User, cs.server)
-				}
+			if _, ok := ch.Users[req.User]; !ok {
+				// User not already in channel
+				ch.join(req.User, cs.server)
+			}
+			if !chOk && len(req.Name) > 1 {
+				ch.mode(nil, []string{"+RP", strings.ToLower(req.Name)[1:]}, cs.server)
 			}
 		case CR_QUIT:
 			// Have to handle quit differently to leave, as it's not channel specific.
@@ -357,10 +358,15 @@ func (ch *channel) mode(user *User, params []string, server *Server) {
 	mc := modeChange.String()
 	// TODO: compress -/+ states
 	if len(mc) > 0 {
+		p := irc.ParsePrefix(server.Name)
+		if user != nil {
+			p = user.Prefix
+		}
 		msg := &irc.Message{
-			Prefix:  user.Prefix,
+			Prefix:  p,
 			Command: "MODE",
 			Params:  append([]string{ch.Name, mc}, modeParam...)}
+		log.Print(msg)
 		for u := range ch.Users {
 			u.Send(msg)
 		}
