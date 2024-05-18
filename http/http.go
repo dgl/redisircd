@@ -11,9 +11,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func init() {
-	// TODO: Move to proper startup
+var redisHost string
+
+func Start(redis string) {
+	redisHost = redis
+
 	http.Handle("/metrics", promhttp.Handler())
+	http.HandleFunc("/publish/", publishHandler)
 }
 
 func Handle(line string, reader io.Reader, writer io.Writer) error {
