@@ -1,0 +1,7 @@
+# Run the binary using the final image, to catch a CGO binary using static
+# base, etc. (This costs an extra layer, but worth it.)
+RUN ["/app/redisircd", "-version"]
+
+CMD ["/app/redisircd", "-listen=:6667"]
+# For development tools.
+EXPOSE 6667
