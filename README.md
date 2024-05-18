@@ -96,3 +96,7 @@ this. More contributions welcome.
   GNU Units and lets a user interact with it like a calculator.
 * [bot.sh](examples/bot.sh) is a wrapper script that can run other carefully
   controlled commands.
+* You may also be interested in
+  [redis-irc-bot](https://github.com/dgl/redis-irc-bot) which is mostly
+  compatible with the `:out` scheme used by `+P` but runs as a bot rather than
+  a server.
